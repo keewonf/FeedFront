@@ -45,10 +45,12 @@ export function App() {
   const [posts, setPosts] = useState([])
 
   useEffect(() => {
+    
     async function fetchPosts(){
       try{
         const response = await api.get('/posts')
         setPosts(response.data)
+      
       } catch(error){
         console.log('Erro ao carregar posts', error)
       }

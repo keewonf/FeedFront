@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { format, formatDistanceToNow } from 'date-fns'
+import { format, formatDistanceToNow, parseISO} from 'date-fns'
+
+
 import { ptBR } from 'date-fns/locale'
 import { api } from '../../services/api'
 import { Avatar } from '../Avatar/Avatar'
@@ -15,15 +17,24 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
   const [newCommentText, setNewCommentText] = useState('')
   const { user } = useAuth()
   const { author, loading} = postAuthors(authorId)
-
   const avatarUrl = loading || !author?.avatar ? avatarPlaceholder : `${api.defaults.baseURL}/files/avatars/${author.avatar}`
+  
+  // Formatando a data/hora
 
   const publishedDateFormatted = format(publishedAt, "d 'de' LLLL 'às' HH:mm'h'", {
     locale: ptBR,
-  })
+    })
 
+  // Função para converte-la para a hora local (vem como UTC 0)
 
-  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+  const convertToLocalTime = (date) => {
+    const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+    return new Date(date.getTime() - offsetMs);
+  };
+
+  const updatedAtLocal = convertToLocalTime(new Date(publishedAt));
+
+  const publishedDateRelativeToNow = formatDistanceToNow(updatedAtLocal, {
     locale: ptBR,
     addSuffix: true,
   })
@@ -31,6 +42,7 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
   if(loading) {
     return <p>Carregando biscoitos...</p>
   }
+  
 
   function handleCreateNewComment(event){
 
@@ -76,7 +88,7 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
           </div>
         </div>
 
-        <time title={publishedDateFormatted} dateTime={publishedAt.toISOString()}>{publishedDateRelativeToNow}</time>
+        <time title={publishedDateFormatted} dateTime={updatedAtLocal.toISOString()}>{publishedDateRelativeToNow}</time>
       </header>
 
       <div className={styles.content}>

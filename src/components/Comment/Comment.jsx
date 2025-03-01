@@ -18,13 +18,24 @@ export function Comment({ id, content, authorId, createdAt, likesCount, onDelete
   const authorName = loading ? 'Carregando Autor' : author?.name || 'Autor Desconhecido';
   const authorRole = loading ? 'Carregando Cargo...' : author?.role || 'Sem cargo';
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Formatando a data/hora
+  
   const createdAtFormatted = format(new Date(createdAt), "d 'de' LLLL 'às' HH:mm'h'", {
     locale: ptBR,
   });
 
+  // Função para converte-la para a hora local (vem como UTC 0)
+
+  const convertToLocalTime = (date) => {
+    const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+    return new Date(date.getTime() - offsetMs);
+  };
+
+  const updatedAtLocal = convertToLocalTime(new Date(createdAt));
 
   // Distância de tempo relativa
-  const createdAtRelative = formatDistanceToNow(new Date(createdAt), {
+  const createdAtRelative = formatDistanceToNow(new Date(updatedAtLocal), {
     locale: ptBR,
     addSuffix: true,
   });
@@ -90,7 +101,7 @@ export function Comment({ id, content, authorId, createdAt, likesCount, onDelete
               <span>{authorRole}</span>
               <time 
               title={createdAtFormatted} 
-              dateTime={new Date(createdAt).toISOString()}>{createdAtRelative}</time>
+              dateTime={new Date(updatedAtLocal).toISOString()}>{createdAtRelative}</time>
             </div>
 
             <button onClick={handleDeleteComment} title='Deletar comentário'>
