@@ -1,0 +1,44 @@
+.header {
+  background: #202024;
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 3rem 1.25rem 0;
+  justify-content: space-between;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.logoContainer img {
+  height: 2rem
+}
+
+.logoContainer strong {
+ padding: 0.625rem 0;
+ font-size: 1.2rem;
+ font-weight: 700;
+ color: #fff;
+ margin-left: 1rem;
+
+}
+
+.logout {
+  border: none;
+  background: none; 
+  cursor: pointer;
+  outline: none;
+  margin-left: auto;
+  
+}
+
+.logout > svg {
+  color: #fff;
+  font-size: 2rem;
+}
