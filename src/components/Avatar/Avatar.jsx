@@ -3,7 +3,7 @@ import styles from "./Avatar.module.css"
 
 const Avatar = forwardRef(({ hasBorder = true, src, onClick, isClickable = false}, ref) => { 
   return(
-    <img 
+    <img
       ref={ref} 
       className={`${hasBorder ? styles.avatarWithBorder : styles.avatar} ${isClickable ? styles.clickable : ''}`}
       src={src} 
