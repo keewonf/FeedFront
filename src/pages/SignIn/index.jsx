@@ -14,12 +14,23 @@ import igniteLogo from '../../assets/ignite-logo.svg';
 export function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { signIn } = useAuth()
 
-  function handleSignIn(){
+  async function handleSignIn(event){
     event.preventDefault()
-    signIn({ email, password})
+
+    if (isSubmitting) return
+
+    try {
+      await signIn({ email, password })
+    } catch (error) {
+      console.error('Erro no login:', error)
+      
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return(
@@ -46,7 +57,7 @@ export function SignIn() {
         />
 
         <Button onClick={handleSignIn}>
-          Entrar
+          {isSubmitting ? 'Entrando...' : 'Entrar'}
         </Button>
 
         <Link to='/register'>

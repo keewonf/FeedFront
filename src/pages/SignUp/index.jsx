@@ -16,14 +16,19 @@ export function SignUp() {
   const [role, setRole] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const navigate = useNavigate()
 
-  function handleSignUp(){
+  function handleSignUp(event){
     event.preventDefault()
     if(!name || !email || !password || !role){
       return alert("Preencha todos os campos!")
     }
+
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
 
     api.post("/users", { name, role, email, password })
       .then(() => {
@@ -36,6 +41,8 @@ export function SignUp() {
         } else {
             alert("Não foi possível cadastrar")
         }
+      }).finally(() => {
+        setIsSubmitting(false)
       })
   }
 
@@ -78,8 +85,8 @@ export function SignUp() {
           onChange={e => setPassword(e.target.value)}
         />
 
-        <Button onClick={handleSignUp}>
-          Cadastrar
+        <Button onClick={handleSignUp} disabled={isSubmitting}>
+          {isSubmitting ? "Cadastrando..." : "Cadastrar"}
         </Button>
 
         <Link to='/'>
