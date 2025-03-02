@@ -76,14 +76,23 @@ export function Sidebar() {
   async function handleUpdate() {
     if(!name.trim() || !role.trim()){
       alert("Nome e cargo são obrigatórios")
-    } else {
-        const user = {
-          name,
-          role,
-        }
-        await updateProfile({user, avatarFile, bannerFile})
-        setIsEditing(false);
-      }
+      return
+    }
+
+    const userData = {
+      name,
+      role,
+    }
+    
+    try {
+      await updateProfile({ user: userData, avatarFile, bannerFile });
+      setIsEditing(false);
+      window.location.reload(); // Só recarrega depois que o updateProfile é concluído
+    } catch (error) {
+      console.error("Erro ao atualizar o perfil:", error);
+      alert("Ocorreu um erro ao atualizar o perfil.");
+    }
+      
   };
 
   return (

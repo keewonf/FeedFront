@@ -58,10 +58,17 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
 
     // Chama o callback para adicionar o comentário no backend
     onAddComment(id, newCommentText)
+    .then(() => {
+      // Se o envio foi bem-sucedido, recarrega a página para atualizar os dados
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error("Erro ao enviar comentário:", error);
+      // Aqui você pode tratar o erro, por exemplo, exibir uma mensagem ao usuário
+    });
     
     setNewCommentText('');
 
-    window.location.reload();
   }
 
   function handleNewCommentChange(event){
@@ -102,8 +109,9 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
 
       <form 
         onSubmit={handleCreateNewComment} 
-        className={styles.commentForm}>
-
+        className={styles.commentForm}
+      >
+        
         <strong>Deixe seu feedback</strong>
 
         <textarea name='comment' placeholder='Escreva um comentário...' 

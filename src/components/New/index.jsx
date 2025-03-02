@@ -20,12 +20,19 @@ export function New(){
   }
 
   async function handleNewPost(event){
-    
-    await api.post('/posts', {
-      content: post,
-    })
+    event.preventDefault()
 
-    alert("Você fez seu post!")
+    try {
+      await api.post('/posts', {
+        content: post,
+      });
+      alert("Você fez seu post!");
+     
+      window.location.reload();
+  } catch (error) {
+    console.error("Erro ao postar:", error);
+    alert("Houve um erro ao fazer seu post.");
+    }
   }
 
   return(
