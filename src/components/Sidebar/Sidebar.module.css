@@ -7,8 +7,6 @@
   overflow: hidden;
   position: sticky; 
   top: 0; 
-  
-
 }
 
 .cover  {
@@ -107,3 +105,13 @@
   border-color: #00B37E; /* Cor da borda */
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    position: static; /* Sidebar não será fixa em telas menores */
+    width: 100%; /* Faz a sidebar ocupar toda a largura da tela */
+    height: auto; /* Não precisa ocupar a altura total da tela */
+    padding: 1rem; /* Um pouco de espaçamento */
+    display: block;
+    background-color: #202024;
+  }
+}
