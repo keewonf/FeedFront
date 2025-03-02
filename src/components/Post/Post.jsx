@@ -45,6 +45,7 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
   
 
   function handleCreateNewComment(event){
+    event.preventDefault()
 
     const newComment = {
       id: Math.random(),  // Gera um ID temporário para evitar chave duplicada
@@ -59,6 +60,8 @@ export function Post({id, authorId, publishedAt, content,initialComments, commen
     onAddComment(id, newCommentText)
     
     setNewCommentText('');
+
+    window.location.reload();
   }
 
   function handleNewCommentChange(event){
