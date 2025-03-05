@@ -8,39 +8,6 @@ import { api } from './services/api'
 
 import styles from './App.module.css'
 
-/* const posts = [
-  {
-    id: 1,
-    author: {
-      avatarUrl: 'https://github.com/diego3g.png',
-      name: "Diego Fernandes",
-      role: 'CTO @RocketSeat'
-    },
-    content: [
-      { type: 'paragraph', content: 'Fala galeraa 👋',},
-      { type: 'paragraph', content: 'Acabei de subir mais um projeto no meu portifa. É um projeto que fiz no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀'},
-      { type: 'link', content: 'jane.design/doctorcare'},
-    ],
-    publishedAt: new Date('2025-10-05 20:00:00')
-  },
-  {
-    id: 2,
-    author: {
-      avatarUrl: 'https://github.com/maykbrito.png',
-      name: "Mayk Brito",
-      role: 'Educator @RocketSeat'
-    },
-    content: [
-      { type: 'paragraph', content: 'Fala galeraa 👋',},
-      { type: 'paragraph', content: 'Acabei de subir mais um projeto no meu portifa. É um projeto que fiz no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀'},
-      { type: 'link', content: 'jane.design/doctorcare'},
-    ],
-    publishedAt: new Date('2025-12-02 20:00:00')
-  },
-]
-*/
-
-
 export function App() {
   const [posts, setPosts] = useState([])
 
@@ -49,13 +16,12 @@ export function App() {
     async function fetchPosts(){
       try{
         const response = await api.get('/posts')
-        setPosts(response.data)
-      
+        const sortedPosts = response.data.sort((a, b) => (a.isFixed === b.isFixed ? 0 : a.isFixed ? -1 : 1))
+        setPosts(sortedPosts)
       } catch(error){
         console.log('Erro ao carregar posts', error)
       }
     }
-
     fetchPosts()
   },[])
 
@@ -78,6 +44,30 @@ export function App() {
     }
   }
 
+  function handleDeletePost(postId){
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  }
+
+  function handleCreatePost(newPost) {
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+  }
+
+  const onUpdatePost = (postId, updatedContent) => {
+    setPosts(prevPosts =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, content: updatedContent } : post
+      )
+    );
+  };
+
+  const onUpdatePostFixed = (postId, isFixed) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post.id === postId ? { ...post, ...isFixed} : { ...post, isFixed: 0 }
+        ).sort((a, b) => (a.isFixed === b.isFixed ? 0 : a.isFixed ? -1 : 1))
+      )
+  }
+ 
   return (
     <div>
       <Header />
@@ -92,11 +82,16 @@ export function App() {
                 key={post.id}
                 id={post.id}
                 authorId={post.user_id}
+                isFixed={post.isFixed}
                 content={post.content}
                 publishedAt={new Date(post.created_at)}
+                updatedAt={new Date(post.updated_at)}
                 initialComments={post.comments}
                 commentLikes={post.commentLikes}
                 onAddComment={onAddComment}
+                onDeletePost={handleDeletePost}
+                onUpdatePost={onUpdatePost}
+                onUpdatePostFixed={onUpdatePostFixed}
               />
             )
           })}

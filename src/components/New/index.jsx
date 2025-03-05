@@ -23,12 +23,12 @@ export function New(){
     event.preventDefault()
 
     try {
-      await api.post('/posts', {
+        await api.post('/posts', {
         content: post,
       });
-      alert("Você fez seu post!");
-     
+      
       window.location.reload();
+      alert("Você fez seu post!");
   } catch (error) {
     console.error("Erro ao postar:", error);
     alert("Houve um erro ao fazer seu post.");

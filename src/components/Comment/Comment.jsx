@@ -1,39 +1,55 @@
 import { useState, useEffect } from 'react';
+import { Trash, ThumbsUp } from 'phosphor-react';
+
 import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Avatar } from '../Avatar/Avatar';
-import styles from './Comment.module.css'
-import { Trash, ThumbsUp } from 'phosphor-react';
+
+
 import { api } from '../../services/api'
 import { useAuth } from '../../hooks/auth';
-import avatarPlaceholder from '../../assets/profileNull.jpg'
+import { USER_PERMISSIONS } from '../../utils/permissions';
 import { postAuthors } from '../../hooks/postsAuthors';
 
+import { Avatar } from '../Avatar/Avatar';
+import styles from './Comment.module.css'
+import avatarPlaceholder from '../../assets/profileNull.jpg'
+
 export function Comment({ id, content, authorId, createdAt, likesCount, onDeleteComment, postId}) {
+  const { user } = useAuth()
+  
   const [likeCount, setLikeCount] = useState(likesCount)
   const [author, setAuthor] = useState(null)
-  const { user } = useAuth()
+  
   const { author: fetchedAuthor, loading} = postAuthors(authorId)
-  const avatarUrl = loading || !author?.avatar ? avatarPlaceholder : `${api.defaults.baseURL}/files/avatars/${author.avatar}`
+  
   const authorName = loading ? 'Carregando Autor' : author?.name || 'Autor Desconhecido';
   const authorRole = loading ? 'Carregando Cargo...' : author?.role || 'Sem cargo';
+  const avatarUrl = loading || !author?.avatar ? avatarPlaceholder : `${api.defaults.baseURL}/files/avatars/${author.avatar}`
+  
   const [errorMessage, setErrorMessage] = useState('');
   
+   // Normalize o formato da data para garantir que sempre seja um objeto Date válido
+  const normalizeDate = (dateString) => {
+    return new Date(dateString);
+  };
+
+  const dateGpt = normalizeDate(createdAt)
+
+  const convertToLocalTime = (date) => {
+
+    const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+    return new Date(date.getTime() - offsetMs);
+  };
+
+  const updatedAtLocal = convertToLocalTime(new Date(dateGpt));
+
   // Formatando a data/hora
   
   const createdAtFormatted = format(new Date(createdAt), "d 'de' LLLL 'às' HH:mm'h'", {
     locale: ptBR,
   });
-
-  // Função para converte-la para a hora local (vem como UTC 0)
-
-  const convertToLocalTime = (date) => {
-    const offsetMs = date.getTimezoneOffset() * 60 * 1000;
-    return new Date(date.getTime() - offsetMs);
-  };
-
-  const updatedAtLocal = convertToLocalTime(new Date(createdAt));
-
+  
+  
   // Distância de tempo relativa
   const createdAtRelative = formatDistanceToNow(new Date(updatedAtLocal), {
     locale: ptBR,
@@ -48,6 +64,9 @@ export function Comment({ id, content, authorId, createdAt, likesCount, onDelete
 
   
   async function handleDeleteComment(){
+    const confirmed = confirm("Você realmente deseja deletar este comentário?");
+    if (!confirmed) return;
+    
     try{
       const response = await api.delete(`/comments/${id}`)
       if(response.status === 200){

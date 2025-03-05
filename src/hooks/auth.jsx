@@ -12,7 +12,8 @@ function AuthProvider({ children }){
     try {
       const response = await api.post('/sessions', { email, password})
       const { user, token} = response.data
-
+      console.log(user)
+      
       localStorage.setItem("@ignitefeed:user", JSON.stringify(user))
       localStorage.setItem("@ignitefeed:token", token)
       
