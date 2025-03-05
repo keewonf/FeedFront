@@ -44,6 +44,32 @@
   color: red;
 }
 
+.postLike button {
+  background: transparent;
+  border: 0;
+  color: #8d8d99;
+  cursor: pointer;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+
+  border-radius: 2px;
+}
+
+.postLike button svg {
+  margin-right: 0.5rem;
+}
+
+.postLike button svg path {
+  stroke-width: 1.36rem;
+  stroke:#8D8D99;
+}
+
+.postLike button span::before {
+  content: "\2022";
+  padding: 0 0.25rem;
+}
+
 .actionButtons {
   position: absolute;
   top: 1rem;
@@ -57,9 +83,14 @@
   color: #8d8d99;
   border: none;
   cursor: pointer;
+
 }
 
 .actionButtons button:first-child {
+  margin-right: 1rem; /* Remove o margin-left do primeiro botão */
+}
+
+.actionButtons button:nth-child(2) {
   margin-right: 1rem; /* Remove o margin-left do primeiro botão */
 }
 

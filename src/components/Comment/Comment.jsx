@@ -132,7 +132,7 @@ export function Comment({ id, content, authorId, createdAt, likesCount, onDelete
         </div>
 
         <footer>
-          <button onClick={handleLikeComment}>
+          <button onClick={handleLikeComment} title='Curtir comentário'>
             <ThumbsUp/>
             Aplaudir <span>{likeCount}</span>
           </button>

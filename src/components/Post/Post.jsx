@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format, formatDistanceToNow, parseISO} from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Trash, NotePencil, X } from 'phosphor-react';
+import { Trash, NotePencil, X, PushPin, PushPinSlash, ThumbsUp} from 'phosphor-react';
 
 import { api } from '../../services/api'
 import { Avatar } from '../Avatar/Avatar'
@@ -13,13 +13,20 @@ import { useAuth } from '../../hooks/auth';
 import { USER_PERMISSIONS } from '../../utils/permissions';
 
 
-export function Post({id, authorId, isFixed, publishedAt, updatedAt, content,initialComments, commentLikes, onAddComment, onDeletePost, onUpdatePost, onUpdatePostFixed}) {
+export function Post({id, authorId, isFixed, publishedAt, updatedAt, content, initialComments, postLikes, commentLikes, onAddComment, onDeletePost, onUpdatePost, onUpdatePostFixed}) {
+  // Usuário Logado
   const { user } = useAuth()
-  const [comments, setComments] = useState(initialComments || []);
+
+  // Configurando comentários
+  const orderedByIdComments = [...initialComments].sort((a, b) => b.id - a.id);
+  const [comments, setComments] = useState(orderedByIdComments || []);
   const [newCommentText, setNewCommentText] = useState('')
+  // Autor info
   const { author, loading} = postAuthors(authorId)
   const avatarUrl = loading || !author?.avatar ? avatarPlaceholder : `${api.defaults.baseURL}/files/avatars/${author.avatar}`
-  
+  // Gerenciamento likes do post
+  const [postLikeCount, setPostLikeCount] = useState(postLikes)
+
   // Estado edição do post
   const [ isEditing, setIsEditing ] = useState(false)
   const [ editedContent, setEditedContent ] = useState(content)
@@ -82,22 +89,29 @@ export function Post({id, authorId, isFixed, publishedAt, updatedAt, content,ini
   }
   
 
-  function handleCreateNewComment(event){
-    event.preventDefault()
-
-    onAddComment(id, newCommentText)
-    .then(async () => {
-      alert("Você comentou")
-      try {
-        const response = await api.get(`/posts/${id}/comments`)
-        setComments(response.data)
-      } catch (error) {
-        console.error("Erro ao carregar comentários atualizados:", error);
-      }
-    })
-    .catch((error) => {
-      console.error("Erro ao enviar comentário:", error);
-    });
+  async function handleCreateNewComment(event) {
+    event.preventDefault();
+  
+    try {
+      // Chama a função que adiciona o comentário
+      await onAddComment(id, newCommentText);
+  
+      alert("Você comentou");
+  
+      // Agora, vamos pegar os comentários atualizados da API
+      const response = await api.get(`/posts/${id}/comments`);
+  
+      // Ordena os comentários antes de atualizar o estado
+      const sortedComments = response.data.sort((a, b) => b.id - a.id);
+  
+      // Atualiza o estado com os comentários ordenados
+      setComments(sortedComments);
+  
+    } catch (error) {
+      console.error("Erro ao carregar comentários atualizados:", error);
+    }
+  
+    // Limpa o campo de texto do novo comentário
     setNewCommentText('');
   }
 
@@ -128,9 +142,9 @@ export function Post({id, authorId, isFixed, publishedAt, updatedAt, content,ini
     } catch(error) {
         if(error.response) {
           alert(error.response.data.message, console.log(`Estado: ${isPinned},Backend: ${isFixed}, PostID: ${id}`))
-      } else {
-          alert("Ocorreu um erro.")
-      }
+        } else {
+            alert("Ocorreu um erro.")
+        }
 
     }
   }
@@ -142,13 +156,34 @@ export function Post({id, authorId, isFixed, publishedAt, updatedAt, content,ini
       alert(response.data.message)
 
       const pinned = response.data.isFixed
-      
-      onUpdatePostFixed(id, { isFixed: pinned})
+      setIsPinned(pinned)
+      onUpdatePostFixed(id, pinned)
     } catch (error) {
-        console.error("Erro ao fixar o post", error);
-        alert("Não foi possível fixar o post.");
+        if(error.response) {
+          alert(error.response.data.message, console.log(`Estado: ${isPinned},Backend: ${isFixed}, PostID: ${id}`))
+        } else {
+            console.error("Erro ao fixar o post", error);
+            alert("Não foi possível fixar o post.");
+          }
+
       }
   }
+
+
+  const handleLikePost = async () => {
+    try {
+      const response = await api.post(`/posts/likes/${id}`);
+      alert(response.data.message);
+      setPostLikeCount(prev => prev + 1);
+    } catch (error) {
+        if(error.response) {
+          alert(error.response.data.message)
+        } else {
+            console.error("Erro ao curtir o post", error);
+            alert("Não foi possível curtir o post.");
+          }
+    }
+  };
   
   const isNewCommentEmpty = newCommentText.length === 0
 
@@ -177,15 +212,14 @@ export function Post({id, authorId, isFixed, publishedAt, updatedAt, content,ini
 
         </div>
 
-        {!isEditing &&
-          [USER_PERMISSIONS.OWNER, USER_PERMISSIONS.MOD, USER_PERMISSIONS.MEMBER ].includes(user.permission) && (
-          <button className={styles.fixedButton} onClick={handleFixed} title="Fixar post">
-            <NotePencil size={24} />
-          </button>
-        )}
-
-        {!isEditing && (
+        {!isEditing && (          
           <div className={styles.actionButtons}>
+            {[USER_PERMISSIONS.OWNER, USER_PERMISSIONS.MOD ].includes(user.permission) && (
+              <button className={styles.fixedButton} onClick={handleFixed} title="Fixar post">
+                {isPinned ? <PushPinSlash size={24} /> : <PushPin size={24} />}
+              </button>
+            )}
+
             <button onClick={handleEdit} title="Editar post">
               <NotePencil size={24} />
             </button>
@@ -233,6 +267,13 @@ export function Post({id, authorId, isFixed, publishedAt, updatedAt, content,ini
           ))}
         </div>
       )}
+
+      <div className={styles.postLike}>
+        <button onClick={handleLikePost} title="Curtir post">
+          <ThumbsUp/>
+          Aplaudir <span>{postLikeCount}</span>
+        </button>
+      </div>
   
       <form 
         onSubmit={handleCreateNewComment} 

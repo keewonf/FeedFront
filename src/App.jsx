@@ -16,8 +16,10 @@ export function App() {
     async function fetchPosts(){
       try{
         const response = await api.get('/posts')
-        const sortedPosts = response.data.sort((a, b) => (a.isFixed === b.isFixed ? 0 : a.isFixed ? -1 : 1))
+        const sortedById = response.data.sort((a, b) => b.id - a.id)
+        const sortedPosts = sortedById.sort((a, b) => (a.isFixed === b.isFixed ? 0 : a.isFixed ? -1 : 1))
         setPosts(sortedPosts)
+
       } catch(error){
         console.log('Erro ao carregar posts', error)
       }
@@ -35,7 +37,7 @@ export function App() {
       setPosts(prevPosts =>
         prevPosts.map(post =>
           post.id === postId
-          ? { ...post, comments: [...post.comments, newComment]}
+          ? { ...post, comments: [...post.comments, newComment].sort((a, b) => b.id - a.id)}
           : post
         )
       )
@@ -61,12 +63,26 @@ export function App() {
   };
 
   const onUpdatePostFixed = (postId, isFixed) => {
-    setPosts(prevPosts =>
-      prevPosts.map(post =>
-        post.id === postId ? { ...post, ...isFixed} : { ...post, isFixed: 0 }
-        ).sort((a, b) => (a.isFixed === b.isFixed ? 0 : a.isFixed ? -1 : 1))
+    setPosts(prevPosts => {
+      // Atualizando o estado de posts, mudando isFixed
+      const updatedPosts = prevPosts.map(post =>
+        post.id === postId ? { ...post, isFixed: isFixed } : { ...post, isFixed: 0 }
       )
+  
+      // Verificando se todos os posts estão desfixados (isFixed === 0)
+      const allUnfixed = updatedPosts.every(post => post.isFixed === 0)
+      console.log('Updated Posts:', updatedPosts);
+      console.log('All Unfixed:', allUnfixed);
+
+      if (allUnfixed) {
+        return updatedPosts.sort((a, b) => b.id - a.id)
+      } else {
+        // Caso contrário, aplicamos o sort para ordenar os fixados no topo
+        return updatedPosts.sort((a, b) => (a.isFixed === b.isFixed ? 0 : a.isFixed ? -1 : 1))
+      }
+    })
   }
+
  
   return (
     <div>
@@ -87,6 +103,7 @@ export function App() {
                 publishedAt={new Date(post.created_at)}
                 updatedAt={new Date(post.updated_at)}
                 initialComments={post.comments}
+                postLikes={post.TotalLikes}
                 commentLikes={post.commentLikes}
                 onAddComment={onAddComment}
                 onDeletePost={handleDeletePost}
