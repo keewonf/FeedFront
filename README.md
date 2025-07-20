@@ -152,7 +152,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE.md) para
 ## 💜 Agradecimentos
 
 - [Rocketseat](https://www.rocketseat.com.br/) pelo design inicial do feed e pelos ensinamentos durante o bootcamp
-- Todos que de alguma forma contribuíram para o projeto
 
 ---
 
