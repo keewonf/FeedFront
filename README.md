@@ -156,4 +156,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE.md) para
 
 ---
 
-<p align="center">Desenvolvido com 💜 por Keewon Floriano</p>
+<p align="center">Desenvolvido com 💜 por Lucas Moura</p>
